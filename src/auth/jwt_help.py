@@ -23,7 +23,7 @@ def encode_jwt(pyload: dict):
 
 def decode_jwt(token: str | bytes):
     try:
-        decode = jwt.decode(token, settings.SECRET_KEY, algorithm=[settings.algoritm])
+        decode = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.algoritm])
         return decode
     except jwt.exceptions.InvalidSignatureError:
         raise HTTPException(
@@ -33,7 +33,7 @@ def decode_jwt(token: str | bytes):
 
 def get_current_token_pyload(token: HTTPBearer = Depends(http_bearer)):
     try:
-        pyload = decode_jwt(token=token)
+        pyload = decode_jwt(token=token.credentials)
         return pyload
     except jwt.exceptions.InvalidTokenError:
         raise HTTPException(
