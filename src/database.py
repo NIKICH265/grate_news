@@ -9,7 +9,7 @@ def read_user():
     return loads(database)
 
 
-def create_user(user):
+def create_data(user):
     db = read_user()
     idx = len(db) + 1
     user["id"] = idx
