@@ -1,19 +1,18 @@
-from fastapi import Form
-from src.auth.utils import hash_password
-from src import database
-from src.database import read_user
-from src.database import create_data
+from src.auth.models import User
+from src.auth.schematics import CreateUser
+from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 
-def create_new_user(nickname: str = Form(), password: str = Form()):
-    hash_pass = hash_password(password)
-    user = {"nickname": nickname, "password": hash_pass, "status": "user"}
-    return create_data(user)
+def create_user(user: CreateUser, session: Session):
+    user_dict = user.model_dump()
+    new_user = User(**user_dict)
+    session.add(new_user)
+    session.commit()
+    return new_user
 
 
-def get_user(nickname: str):
-    db = read_user()
-    for user in db:
-        if nickname == user["nickname"]:
-            user["password"] = user["password"].encode()
-            return user
+def get_user(username: str, session: Session):
+    stmt = select(User).where(User.username == username)
+    user = session.scalar(stmt)  # scalars
+    return user

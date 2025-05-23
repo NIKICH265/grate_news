@@ -1,14 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class User(BaseModel):
-    nick_name: str
+    model_config = ConfigDict(from_attributes=True)
+    username: str
 
 
 class CreateUser(User):
-    password: str
+    password: bytes
 
 
 class ReadUser(User):
     id: int
-    status: str
+    role: str

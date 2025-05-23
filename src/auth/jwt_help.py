@@ -1,29 +1,25 @@
 from fastapi.security import HTTPBearer
 import jwt
 from fastapi import HTTPException, status, Depends
-from src.auth.schematics import CreateUser
+from src.auth.schematics import ReadUser
 from src.settings import settings
 
 http_bearer = HTTPBearer()
 
 
-def create_jwt(user):
-    jwt_py_load = {
-        "id": user["id"],
-        "nickname": user["nickname"],
-        "status": user["status"],
-    }
+def create_jwt(user: ReadUser):
+    jwt_py_load = {"id": user.id, "username": user.username, "role": user.role}
     return encode_jwt(jwt_py_load)
 
 
 def encode_jwt(pyload: dict):
-    encoded = jwt.encode(pyload, settings.SECRET_KEY, algorithm=settings.algoritm)
+    encoded = jwt.encode(pyload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded
 
 
 def decode_jwt(token: str | bytes):
     try:
-        decode = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.algoritm])
+        decode = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return decode
     except jwt.exceptions.InvalidSignatureError:
         raise HTTPException(

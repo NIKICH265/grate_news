@@ -1,20 +1,22 @@
-from json import loads, dumps
-
-database_link = "src/database.json"
-
-
-def read_user():
-    with open(database_link, "r") as file:
-        database = file.read()
-    return loads(database)
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+import sqlalchemy
+from src.settings import settings
 
 
-def create_data(user):
-    db = read_user()
-    idx = len(db) + 1
-    user["id"] = idx
-    user["password"] = user["password"].decode()
-    db.append(user)
-    with open(database_link, "w") as file:
-        file.write(dumps(db, indent=4))
-    return user
+class Base(DeclarativeBase):
+    pass
+
+
+class DatabaseHelper:
+    def __init__(self, path, echo=False):
+        self.engine = sqlalchemy.create_engine(url=path, echo=echo)
+        self.session_factory = sessionmaker(
+            self.engine, autoflush=False, expire_on_commit=False, autocommit=False
+        )
+
+    def session_depends(self):
+        with self.session_factory() as session:
+            yield session
+
+
+db_helper = DatabaseHelper(settings.db_path, settings.DEBUG)
