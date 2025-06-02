@@ -1,11 +1,10 @@
 from sqlalchemy.orm import Session
-
 from src.news import schemas
+from src.news.enums import NewsStatus
 from src.news.models import News
 from src.news.schemas import CreateNews
 from src.auth.crud import get_user
 from sqlalchemy import select, desc
-from src.settings import settings
 
 
 def create_news(data: CreateNews, user: dict, session: Session):
@@ -28,11 +27,7 @@ def get_news(id: int, session: Session) -> News:
 
 
 def get_all_news(session: Session):
-    stmt = (
-        select(News)
-        .where(News.status == settings.NEWS_STATUS["confirm"])
-        .order_by(desc(News.id))
-    )
+    stmt = select(News).where(News.status == NewsStatus.confirm).order_by(desc(News.id))
     news = session.scalars(stmt).all()
     return news
 
@@ -42,6 +37,7 @@ def updating_news(news: News, news_data: schemas.UpdateNewsSchemas, session: Ses
         news.title = news_data.title
     if news_data.content is not None:
         news.content = news_data.content
+    news.status = NewsStatus.pending
     session.commit()
     return news
 

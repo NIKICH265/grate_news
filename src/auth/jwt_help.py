@@ -35,3 +35,18 @@ def get_current_token_pyload(token: HTTPBearer = Depends(http_bearer)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token2"
         )
+
+
+def is_admin(token: HTTPBearer = Depends(http_bearer)):
+    try:
+        pyload = decode_jwt(token=token.credentials)
+        if pyload["role"] == "admin":
+            return pyload
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="you do not have access rights",
+        )
+    except jwt.exceptions.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token2"
+        )

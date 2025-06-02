@@ -14,5 +14,5 @@ def create_user(user: CreateUser, session: Session):
 
 def get_user(username: str, session: Session):
     stmt = select(User).where(User.username == username)
-    user = session.scalar(stmt)  # scalars
+    user = session.scalar(stmt)
     return user

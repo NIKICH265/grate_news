@@ -10,11 +10,9 @@ from src.news.crud import (
     updating_news,
     deleting_news,
 )
-from src.settings import settings
-from src.news.security.view import router as security_router
+from src.news.enums import NewsStatus
 
 router = APIRouter(tags=["news"])
-router.include_router(security_router)
 
 
 @router.get("/")
@@ -42,7 +40,7 @@ def create_new_news(
 @router.get("/{idx}")
 def get_one_news(idx: int, session: Session = Depends(db_helper.session_depends)):
     news = get_news(idx, session)
-    if news.status == settings.NEWS_STATUS["confirm"]:
+    if news.status == NewsStatus.confirm:
         return news
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail="news is not found"
@@ -62,7 +60,7 @@ def update_news(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="news is not found"
         )
-    if news.status == settings.NEWS_STATUS["confirm"]:
+    if news.status == NewsStatus.confirm:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="confirmed news is not updatable",
@@ -76,7 +74,7 @@ def update_news(
     return new_news
 
 
-@router.delete("/")
+@router.delete("/{idx}")
 def delete_news(
     idx: int,
     session: Session = Depends(db_helper.session_depends),
@@ -92,6 +90,7 @@ def delete_news(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="you can delete only your own news",
         )
-    if news.status != "confirm":
-        deleting_news(news, session)
-        return "deleted"
+    if news.status == NewsStatus.confirm:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    deleting_news(news, session)
+    return "deleted"
