@@ -1,6 +1,6 @@
 from fastapi.security import HTTPBearer
 import jwt
-from fastapi import HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends, Request
 from src.auth.schematics import ReadUser
 from src.settings import settings
 
@@ -27,9 +27,10 @@ def decode_jwt(token: str | bytes):
         )
 
 
-def get_current_token_pyload(token: HTTPBearer = Depends(http_bearer)):
+def get_current_token_pyload(request: Request):
     try:
-        pyload = decode_jwt(token=token.credentials)
+        token = request.cookies.get("access_token")
+        pyload = decode_jwt(token=token)
         return pyload
     except jwt.exceptions.InvalidTokenError:
         raise HTTPException(
@@ -37,9 +38,14 @@ def get_current_token_pyload(token: HTTPBearer = Depends(http_bearer)):
         )
 
 
-def is_admin(token: HTTPBearer = Depends(http_bearer)):
+def is_admin(
+    # token: HTTPBearer = Depends(http_bearer)
+    request: Request,
+):
     try:
-        pyload = decode_jwt(token=token.credentials)
+        token = request.cookies.get("access_token")
+        pyload = get_current_token_pyload(token)
+        # pyload = decode_jwt(token=token.credentials)
         if pyload["role"] == "admin":
             return pyload
         raise HTTPException(

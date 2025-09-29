@@ -24,7 +24,7 @@ def get_newses(session: Session = Depends(db_helper.session_depends)):
 @router.post("/")
 def create_new_news(
     news: schemas.CreateNews,
-    user=Depends(get_current_token_pyload),
+    user: dict = Depends(get_current_token_pyload),
     session: Session = Depends(db_helper.session_depends),
 ):
     new_news = create_news(news, user, session)

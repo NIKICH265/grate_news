@@ -4,7 +4,6 @@ import bcrypt
 from src.auth.schematics import CreateUser
 from src.auth.utils import hash_password
 from sqlalchemy.orm import Session
-
 from src.database import db_helper
 
 

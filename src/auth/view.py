@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
 from src.auth import crud
 from src.auth.schematics import ReadUser
 from src.auth.validate import validate_auth_user, create_new_user
 from src.auth.jwt_help import create_jwt, get_current_token_pyload
 from src.database import db_helper
-from fastapi import HTTPException, status
+from src.auth.utils import sign_in
+
 
 router = APIRouter(tags=["login"])
 
@@ -26,9 +27,10 @@ def register(
 
 
 @router.post("/sign_in")
-def auth_user(user: ReadUser = Depends(validate_auth_user)):
-    access_token = create_jwt(user)
-    return access_token
+def auth_user(response: Response, user: ReadUser = Depends(validate_auth_user)):
+    # access_token = create_jwt(user)
+    # return access_token
+    return sign_in(response, user)
 
 
 @router.get("/about_me")
@@ -36,3 +38,10 @@ def about_me(credentionals=Depends(get_current_token_pyload)):
     if not credentionals:
         return "Error"
     return credentionals
+
+
+@router.get("/sign_out")
+def sign_out():
+    response = Response()
+    response.delete_cookie("access_token")
+    return response

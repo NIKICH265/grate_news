@@ -1,10 +1,10 @@
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, mapped_column, Mapped
 import sqlalchemy
 from src.settings import settings
 
 
 class Base(DeclarativeBase):
-    pass
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 class DatabaseHelper:
